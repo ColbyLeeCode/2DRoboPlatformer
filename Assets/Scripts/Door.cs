@@ -10,6 +10,8 @@ public class Door : MonoBehaviour
     [SerializeField]
     GameObject DoorType;
 
+    GameManager gameManager;
+
     //track the state of the door
     int stateOfDoor = 1;
 
@@ -17,6 +19,7 @@ public class Door : MonoBehaviour
     {
         //init animator
         anim = GetComponent<Animator>();
+        gameManager = FindObjectOfType<GameManager>();
 
         //set entry door to open
         if (DoorType.name == "EntryDoor")
@@ -33,6 +36,14 @@ public class Door : MonoBehaviour
         {
             anim.SetFloat("DoorState", 1);
             stateOfDoor = 1;
+        }
+    }
+
+    void OnTriggerEnter2D(Collider2D col)
+    {
+        if (stateOfDoor == 3)
+        {
+            gameManager.LoadNextLevel(gameManager.GetCurrentSceneIndex() + 1);
         }
     }
 

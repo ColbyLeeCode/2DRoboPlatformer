@@ -17,7 +17,7 @@ public class PlayerHealth : MonoBehaviour
     Animator anim;
 
     float maxHealth = 100;
-    float currHealth;
+    public float currHealth { get; set; }
 
     void Start()
     {

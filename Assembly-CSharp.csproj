@@ -57,9 +57,11 @@
   <ItemGroup>
     <Compile Include="Assets\Scripts\AudioManager.cs" />
     <Compile Include="Assets\Scripts\BackgroundTiles.cs" />
+    <Compile Include="Assets\Scripts\Bullet.cs" />
     <Compile Include="Assets\Scripts\Door.cs" />
     <Compile Include="Assets\Scripts\FollowTarget.cs" />
     <Compile Include="Assets\Scripts\GameManager.cs" />
+    <Compile Include="Assets\Scripts\HealthPickup.cs" />
     <Compile Include="Assets\Scripts\Menu.cs" />
     <Compile Include="Assets\Scripts\PlayerHealth.cs" />
     <Compile Include="Assets\Scripts\RobotController.cs" />

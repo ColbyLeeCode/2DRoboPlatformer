@@ -37,20 +37,28 @@ public class RobotController : MonoBehaviour
     //var to check double jump
     bool doubleJump = false;
 
+    public Transform muzzle;
+
+    public GameObject bullet;
+
+    AudioManager audioManager;
+
     void Start()
     {
+        audioManager = AudioManager.instance;
+
         anim = GetComponent<Animator>();
         //sanity check to ensure on start player isn't dead
         anim.SetBool("isDead", false);
 
-        //get the default sizes of our capsules being used store in vector
-        float capsuleWidth = healthCollider.GetComponent<CapsuleCollider2D>().size.x;
-        float capsuleHeight = healthCollider.GetComponent<CapsuleCollider2D>().size.y;
-        //get the default offset of our capsule colliders store in vector
+        //get the default sizes of our capsules being used 
+        float dCapsuleWidth = healthCollider.GetComponent<CapsuleCollider2D>().size.x;
+        float dCapsuleHeight = healthCollider.GetComponent<CapsuleCollider2D>().size.y;
+        //get the default offset of our capsule colliders
         float offsetX = healthCollider.GetComponent<CapsuleCollider2D>().offset.x;
         float offsetY = healthCollider.GetComponent<CapsuleCollider2D>().offset.y;
 
-        capsuleSize = new Vector2(capsuleWidth, capsuleHeight);
+        capsuleSize = new Vector2(dCapsuleWidth, dCapsuleHeight);
         capsuleOffset = new Vector2(offsetX, offsetY);
     }
     //physics in fixed update
@@ -82,21 +90,18 @@ public class RobotController : MonoBehaviour
 
             if (move > 0)
             {
-                GetComponent<SpriteRenderer>().flipX = false;
-
+                this.transform.localScale = new Vector3(1, 1, 1);
             }
             else if (move < 0)
             {
-                GetComponent<SpriteRenderer>().flipX = true;
-
+                this.transform.localScale = new Vector3(-1, 1, 1);
             }
         }
     }
 
     void Update()
     {
-        GetInputMovement();
-        
+        GetInputMovement();       
     }
 
     private void GetInputMovement()
@@ -106,6 +111,7 @@ public class RobotController : MonoBehaviour
         //jump if not already double jumped and on the ground
         if ((grounded || !doubleJump) && Input.GetKeyDown(KeyCode.Space))
         {
+            sliding = false;
             //not on the ground
             anim.SetBool("Ground", false);
             //set the speed of y axis  to zero prior to adding additonal force
@@ -113,7 +119,7 @@ public class RobotController : MonoBehaviour
             //add jump force the Y axis of the rigid body of the robot
             GetComponent<Rigidbody2D>().AddForce(new Vector2(0, jumpForce));
             //not sliding
-            sliding = false;
+            
 
             if (!doubleJump && !grounded)
                 doubleJump = true;
@@ -128,32 +134,72 @@ public class RobotController : MonoBehaviour
 
             sliding = true;
 
-            //resize healthcollider and groundCheck capsule smaller for sliding under things            
-            healthCollider.GetComponent<CapsuleCollider2D>().size = new Vector2(capsuleSize.x, capsuleSize.y/ 2);
-            healthCollider.GetComponent<CapsuleCollider2D>().offset = new Vector2(capsuleOffset.x, -1.26f);
-            GetComponent<CapsuleCollider2D>().size = new Vector2(capsuleSize.x, capsuleSize.y / 2);
-            GetComponent<CapsuleCollider2D>().offset = new Vector2(capsuleOffset.x, -1.26f);
-
+            //resize healthcollider and groundCheck capsule smaller for sliding under things
+            CapsuleResize(healthCollider.GetComponent<CapsuleCollider2D>(), false);
+            CapsuleResize(GetComponent<CapsuleCollider2D>(), false);
         }
 
-        //if sliding velocity has stopped event has ended set sliding, to false
+        //if sliding velocity has stopped event has ended set sliding, to false       
         float xVelocity = GetComponent<Rigidbody2D>().velocity.x;
-        if (Mathf.Abs(xVelocity) < 0.2f)
+        if (Mathf.Abs(xVelocity) < 0.2f || !grounded)
         {
             anim.SetBool("isSliding", false);
 
             sliding = false;
         }
+   
 
         if(!sliding)
         {
             //resize healthcollider and groundCheck capsule back to full size
-            healthCollider.GetComponent<CapsuleCollider2D>().size = capsuleSize;
-            healthCollider.GetComponent<CapsuleCollider2D>().offset = capsuleOffset;
-            GetComponent<CapsuleCollider2D>().size = capsuleSize;
-            GetComponent<CapsuleCollider2D>().offset = capsuleOffset;
+            CapsuleResize(healthCollider.GetComponent<CapsuleCollider2D>(), true);
+            CapsuleResize(GetComponent<CapsuleCollider2D>(), true);
         }
 
-        //if not sliding ensure capsule is correct size
+        //-----Handle Firing Weapon-----
+        if (Input.GetButtonDown("Fire1") && !sliding)
+        {
+
+            GameObject nBullet = Instantiate(bullet, muzzle.position, muzzle.rotation);
+
+            audioManager.PlaySound("firebullet");
+
+            nBullet.transform.parent = GameObject.Find("GameManager").transform;
+
+            nBullet.GetComponent<Renderer>().sortingLayerName = "Player";
+
+            anim.SetBool("isShooting", true);
+        }
+
+        if(Input.GetButtonUp("Fire1"))
+        {
+            anim.SetBool("isShooting", false);
+            anim.SetBool("isRunningShot", false);
+        }
+
+        if(Input.GetButtonDown("Fire1") && Mathf.Abs(GetComponent<Rigidbody2D>().velocity.x) > 0)
+        {
+            anim.SetBool("isRunningShot", true);
+        }
+    }
+
+    //Resizes and offsets the capsule for sliding - shrinks the capsule or restores to default sizes and offset
+    private void CapsuleResize(CapsuleCollider2D capsule, bool defaults)
+    {
+        //reset to default size (running / jumping)
+        if(defaults)
+        {
+            capsule.size = capsuleSize;
+            capsule.offset = capsuleOffset;
+        }
+        //resizes capsule for sliding
+        else
+        {
+            capsule.size = new Vector2(capsuleSize.x, capsuleSize.y / 1.35f);
+            if (GetComponent<SpriteRenderer>().flipX)
+                capsule.offset = new Vector2(1.39f, -0.73f);
+            else
+                capsule.offset = new Vector2(-1.39f, -0.73f);
+        }
     }
 }

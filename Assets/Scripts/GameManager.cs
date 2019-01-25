@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+using UnityEngine.SceneManagement;
 
 public class GameManager : MonoBehaviour
 {
@@ -10,14 +11,27 @@ public class GameManager : MonoBehaviour
     [SerializeField]
     GameObject exitDoor;
 
+    GameObject[] bullets { get; set; }
+
     int numOfSwitches = 0;
+    
 
     [SerializeField]
     Text switchCount;
 
+    public void LoadNextLevel(int scene)
+    {
+        SceneManager.LoadScene(scene);
+    }
+
     void Start()
     {
         GetNumOfSwitches();
+    }
+
+    public int GetCurrentSceneIndex()
+    {
+        return SceneManager.GetActiveScene().buildIndex;
     }
 
     public int GetNumOfSwitches()
@@ -47,6 +61,9 @@ public class GameManager : MonoBehaviour
 
     void Update()
     {
+        //check if bullet has collided with anything
+        
+
         switchCount.text = GetNumOfSwitches().ToString();
 
         GetExitDoorState();
