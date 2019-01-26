@@ -16,8 +16,16 @@ public class Menu : MonoBehaviour
 
     AudioManager audioManager;
 
-    enum MenuStates { Playing, Pause, Options, Help}
+    enum MenuStates { Playing, Pause, Options, Help, Dead, MainMenu}
     MenuStates currentState;
+
+    void Awake()
+    {
+        if (SceneManager.GetActiveScene().buildIndex == 0)
+            currentState = MenuStates.MainMenu;
+        else
+            currentState = MenuStates.Playing;
+    }
 
     void Start()
     {
@@ -37,7 +45,13 @@ public class Menu : MonoBehaviour
 
         switch (currentState)
         {
-            
+            case MenuStates.MainMenu:
+                currentState = MenuStates.MainMenu;
+                pausedWindow.SetActive(true);
+                optionsWindow.SetActive(false);
+                helpWindow.SetActive(false);
+                menuUI.SetActive(true);                            
+                break;
             case MenuStates.Playing:
                 currentState = MenuStates.Playing;
                 pausedWindow.SetActive(false);
@@ -77,9 +91,14 @@ public class Menu : MonoBehaviour
         }
     }
 
+    public void StartNewGame()
+    {
+        SceneManager.LoadScene(1);
+    }
+
     public void Restart()
     {
-        SceneManager.LoadScene(0);
+        SceneManager.LoadScene(GameManager.gm.GetCurrentLevel());
     }
 
     public void DisplayOptions()

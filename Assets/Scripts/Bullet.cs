@@ -6,18 +6,19 @@ using UnityEngine;
 public class Bullet : MonoBehaviour
 {
     public float bulletSpeed;
+    public float damage = 33.3f;
     
     private RobotController player;
     private GameManager manager;
     private Rigidbody2D body;
-
+    private AudioManager audio;
 
     void Start()
     {
         player = FindObjectOfType<RobotController>();
         manager = FindObjectOfType<GameManager>();
         body = GetComponent<Rigidbody2D>();
-        
+        audio = FindObjectOfType<AudioManager>();
 
         if (player.transform.localScale.x < 0)
         {
@@ -34,6 +35,7 @@ public class Bullet : MonoBehaviour
         if (collision.collider.name != "Robot")
         {
             Debug.Log(collision.collider.name);
+            audio.PlaySound("electrictick");
             Destroy(gameObject);
         }
        

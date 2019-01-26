@@ -97,4 +97,9 @@ public class AudioManager : MonoBehaviour
         }
     }
 
+    public Sound GetSound(int id)
+    {
+        return sound[id];
+    }
+
 }

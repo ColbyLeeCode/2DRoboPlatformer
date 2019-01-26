@@ -41,12 +41,15 @@ public class RobotController : MonoBehaviour
 
     public GameObject bullet;
 
+    private float stepTime;
+    private float timer;
+
     AudioManager audioManager;
 
     void Start()
     {
         audioManager = AudioManager.instance;
-
+        stepTime = audioManager.GetSound(9).clip.length - .2f;
         anim = GetComponent<Animator>();
         //sanity check to ensure on start player isn't dead
         anim.SetBool("isDead", false);
@@ -69,6 +72,9 @@ public class RobotController : MonoBehaviour
 
         //tell the animator that we are grounded
         anim.SetBool("Ground", grounded);
+
+        //if walking play footsteps
+        PlayFootStep();
 
         //reset double jump
         if (grounded)
@@ -99,9 +105,25 @@ public class RobotController : MonoBehaviour
         }
     }
 
+    void PlayFootStep()
+    {
+        //gurgle every three seconds
+        if (anim.GetFloat("Speed") > 0 && grounded && !sliding)
+        {
+            timer += Time.deltaTime;
+            if (timer > stepTime)
+            {
+                audioManager.PlaySound("footstep");
+                timer = 0f;
+            }
+        }
+    }
+
     void Update()
     {
-        GetInputMovement();       
+        GetInputMovement();
+
+       
     }
 
     private void GetInputMovement()
@@ -119,10 +141,13 @@ public class RobotController : MonoBehaviour
             //add jump force the Y axis of the rigid body of the robot
             GetComponent<Rigidbody2D>().AddForce(new Vector2(0, jumpForce));
             //not sliding
-            
+
 
             if (!doubleJump && !grounded)
+            {
                 doubleJump = true;
+                audioManager.PlaySound("puff");
+            }
         }
 
         //-----Handle Sliding-----
@@ -137,6 +162,9 @@ public class RobotController : MonoBehaviour
             //resize healthcollider and groundCheck capsule smaller for sliding under things
             CapsuleResize(healthCollider.GetComponent<CapsuleCollider2D>(), false);
             CapsuleResize(GetComponent<CapsuleCollider2D>(), false);
+
+            //play sliding noise
+            audioManager.PlaySound("slidingmetal");
         }
 
         //if sliding velocity has stopped event has ended set sliding, to false       

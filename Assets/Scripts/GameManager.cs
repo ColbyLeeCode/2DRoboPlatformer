@@ -19,6 +19,25 @@ public class GameManager : MonoBehaviour
     [SerializeField]
     Text switchCount;
 
+    public static GameManager gm;
+
+    void Awake()
+    {
+        gm = this;
+
+        Debug.Log("GameManger instance:" + gm.ToString());
+    }
+
+    public void LoadLastSave(int index)
+    {
+        SceneManager.LoadScene(index);
+    }
+
+    public int GetCurrentLevel()
+    {
+        return SceneManager.GetActiveScene().buildIndex;
+    }
+
     public void LoadNextLevel(int scene)
     {
         SceneManager.LoadScene(scene);
